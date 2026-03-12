@@ -1,0 +1,12 @@
+{
+  "name": "One Page Importer",
+  "version": "0.0.1",
+    "manifest_version": 1,
+  "action": {
+    "title": "One Page Importer",
+    "icon": "/icon.svg",
+    "popover": "/",
+    "height": 600,
+    "width": 400
+  }
+}
