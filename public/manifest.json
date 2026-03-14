@@ -1,7 +1,10 @@
 {
   "name": "One Page Importer",
-  "version": "1.0.0",
+  "author":"EnderPi",
+  "icon":"/icon.svg",
+  "version": "1.0.1",
     "manifest_version": 1,
+  "description":"Import Maps from Watabous' One Page Dungeon",
   "action": {
     "title": "One Page Importer",
     "icon": "/icon.svg",
