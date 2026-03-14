@@ -3,7 +3,7 @@ import "./style.css";
 // import viteLogo from "/vite.svg";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
-import OBR, { isImage, type Item } from "@owlbear-rodeo/sdk";
+import OBR, { isImage } from "@owlbear-rodeo/sdk";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -21,7 +21,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <select name="images" id="mapSelect" ></select>
       <br>
       <button id="importJSONButton">Import JSON</button>
-      <!-- <button id="test">Test</button> -->
+      <button id="test">Test</button>
 
   </div> 
 `;
@@ -30,12 +30,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 // console.log(OBR.isAvailable);
 // console.log(OBR.isReady);
-
-interface Door {
-  start: { distance: number; index: number };
-  end: { distance: number; index: number };
-  open: Boolean;
-}
 
 OBR.onReady(() => {
   // console.log("OBR ready!");
@@ -77,7 +71,7 @@ OBR.onReady(() => {
     .addEventListener("click", () => {
       // console.log(OBR.scene.items.getItems());
 
-      OBR.scene.items.getItems().then((item) => {
+      OBR.scene.items.getItems(isImage).then((item) => {
         console.log(item);
         // (
         //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
@@ -125,13 +119,16 @@ function updateMapSelection(): void {
     select.innerHTML = "";
 
     // Add an option for each image found in the scene
-    images.forEach((img) => {
-      const option = document.createElement("option");
-      option.value = img.id;
-      // Use the image name or a fallback if it's unnamed
-      option.textContent = img.name || `Unnamed Image (${img.id.slice(0, 5)})`;
-      select.appendChild(option);
-    });
+    images
+      .filter((i) => i.layer == "MAP")
+      .forEach((img) => {
+        const option = document.createElement("option");
+        option.value = img.id;
+        // Use the image name or a fallback if it's unnamed
+        option.textContent =
+          img.name || `Unnamed Image (${img.id.slice(0, 5)})`;
+        select.appendChild(option);
+      });
 
     // If selectedValue exists in the new options, set it as the selected value
     if (selectedValue) {
