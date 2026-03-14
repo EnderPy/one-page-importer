@@ -433,7 +433,7 @@ function reformatRooms(jsonText: string) {
                 open: false,
               };
               if (direction == Directions.RIGHT) {
-                console.log("Drawing door in Directions.RIGHT");
+                // console.log("Drawing door in Directions.RIGHT");
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
@@ -444,7 +444,7 @@ function reformatRooms(jsonText: string) {
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
               } else if (direction == Directions.LEFT) {
-                console.log("Drawing door in Directions.LEFT");
+                // console.log("Drawing door in Directions.LEFT");
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
@@ -458,7 +458,7 @@ function reformatRooms(jsonText: string) {
 
               // up down
               else if (direction == Directions.DOWN) {
-                console.log("Drawing door in Directions.DOWN", door);
+                // console.log("Drawing door in Directions.DOWN", door);
 
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
@@ -469,7 +469,7 @@ function reformatRooms(jsonText: string) {
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
               } else if (direction == Directions.UP) {
-                console.log("Drawing door in Directions.UP");
+                // console.log("Drawing door in Directions.UP");
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
@@ -480,7 +480,7 @@ function reformatRooms(jsonText: string) {
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
               }
-              console.log("door", d);
+              // console.log("door", d);
               doors.push(d);
             });
           } else {
@@ -645,7 +645,10 @@ function reformatRooms(jsonText: string) {
 }
 
 // DPI
-export function generateWalls(jsonText: string) {
+export function generateWalls(
+  jsonText: string,
+  position: Point = { x: 0, y: 0 },
+) {
   // const scale = 150;
   // console.log(OBR.scene.items.getItems());
   // calculate positioning
@@ -655,7 +658,7 @@ export function generateWalls(jsonText: string) {
 
   var commands: PathCommand[][] = rfm.commands;
   var metadata: Door[][] = rfm.metadata;
-  console.log(metadata);
+  // console.log(metadata);
 
   // const bounds = content.rects.reduce(
   //   (acc, rect) => ({
@@ -674,9 +677,9 @@ export function generateWalls(jsonText: string) {
   //TODO: update to paths seperated by doors
   let paths: Path[] = [];
   for (const [index, c] of commands.entries()) {
-    let d = buildPath().commands(c).layer("FOG");
+    let d = buildPath().commands(c).layer("FOG").position(position);
     if (metadata[index]) {
-      console.log(metadata.at(index));
+      // console.log(metadata.at(index));
 
       d = d.metadata({
         "rodeo.owlbear.dynamic-fog/doors": metadata.at(index),

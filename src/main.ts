@@ -3,21 +3,25 @@ import "./style.css";
 // import viteLogo from "/vite.svg";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
-import OBR, { isImage } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, type Item } from "@owlbear-rodeo/sdk";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-
-    <label for="jsonTextBox">Import JSON text</label>
+<h3>One Page Dungeon Importer</h3>
+    <label for="jsonFileUpload">Import JSON file</label>
     <br>
     <input type="file" id="jsonFileUpload">
+    <br>
+    <label for="jsonTextBox">Import as Text</label>
     <textarea id="jsonTextBox" class="fullSizeText" rows="22"></textarea>
 
       <br>
-      <button id="importJSONButton">Import JSON</button>
-      <button id="test">Test</button>
+      <label for="images">Select Map:</label>
       <br>
       <select name="images" id="mapSelect" ></select>
+      <br>
+      <button id="importJSONButton">Import JSON</button>
+      <!-- <button id="test">Test</button> -->
 
   </div> 
 `;
@@ -36,15 +40,16 @@ interface Door {
 OBR.onReady(() => {
   // console.log("OBR ready!");
   updateMapSelection();
-  document
-    .querySelector<HTMLSelectElement>("#mapSelect")
-    ?.addEventListener("change", () => {
-      updateMapSelection();
-    });
+  // document
+  //   .querySelector<HTMLSelectElement>("#mapSelect")
+  //   ?.addEventListener("change", () => {
+  //     updateMapSelection();
+  //   });
   OBR.scene.items.onChange(updateMapSelection);
   // OBR.scene.items.onChange((items) => {
   //   console.log(items);
   // });
+  var currentPos = { x: 0, y: 0 };
   document
     .querySelector<HTMLInputElement>("#jsonFileUpload")!
     .addEventListener("change", (event) => {
@@ -73,11 +78,7 @@ OBR.onReady(() => {
       // console.log(OBR.scene.items.getItems());
 
       OBR.scene.items.getItems().then((item) => {
-        console.log(
-          item.map(
-            (v) => v.metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>,
-          ),
-        );
+        console.log(item);
         // (
         //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
         // ).push({
@@ -86,39 +87,26 @@ OBR.onReady(() => {
         //   end: { distance: 500, index: 0 },
         // });
       });
-
-      // console.log("Fog:", OBR.player.hasPermission("FOG_CREATE"));
-
-      // const itema = buildShape()
-      //   .width(10)
-      //   .height(10)
-      //   .shapeType("CIRCLE")
-      //   .build();
-      // OBR.scene.items.addItems([itema]);
-      // var p = JSON.parse(
-      //   document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
-      // );
-      // console.log(p);
-
-      // const item = buildWall().points(p).build();
-      // console.log(item);
-
-      // OBR.scene.items.addItems([item]).then(
-      //   () => {
-      //     console.log("created item");
-      //   },
-      //   (reason) => {
-      //     console.log(reason);
-      //   },
-      // );
     });
+  document
+    .querySelector<HTMLSelectElement>("#mapSelect")
+    ?.addEventListener("change", (ev) => {
+      console.log(ev);
 
+      OBR.scene.items
+        .getItems([(ev.target as HTMLSelectElement).value])
+        .then((item) => {
+          currentPos = item[0].position;
+        });
+    });
   document
     .querySelector<HTMLButtonElement>("#importJSONButton")!
     .addEventListener("click", (ev) => {
       ev.preventDefault();
+      console.log(currentPos);
       generateWalls(
         document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
+        currentPos,
       );
     });
 
@@ -130,6 +118,7 @@ function updateMapSelection(): void {
 
   OBR.scene.items.getItems(isImage).then((images) => {
     const select = document.querySelector<HTMLSelectElement>("#mapSelect");
+    const selectedValue = select?.value || null;
     if (!select) return;
 
     // Clear existing options
@@ -143,5 +132,16 @@ function updateMapSelection(): void {
       option.textContent = img.name || `Unnamed Image (${img.id.slice(0, 5)})`;
       select.appendChild(option);
     });
+
+    // If selectedValue exists in the new options, set it as the selected value
+    if (selectedValue) {
+      if (
+        Array.from(select.children).some(
+          (child) => (child as HTMLOptionElement).value === selectedValue,
+        )
+      ) {
+        select.value = selectedValue;
+      }
+    }
   });
 }
