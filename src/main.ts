@@ -3,8 +3,7 @@ import "./style.css";
 // import viteLogo from "/vite.svg";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
-import OBR, { buildWall, buildShape, isImage } from "@owlbear-rodeo/sdk";
-import { ListFormat } from "typescript";
+import OBR, { isImage } from "@owlbear-rodeo/sdk";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>

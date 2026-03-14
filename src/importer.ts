@@ -1,13 +1,10 @@
 import OBR, {
   buildPath,
-  buildShape,
   type Path,
-  type Shape,
   type Vector2,
   Command,
   type PathCommand,
 } from "@owlbear-rodeo/sdk";
-import type { EnumDeclaration } from "typescript";
 import arcToBezier, { type CubicBezierCurve } from "svg-arc-to-cubic-bezier";
 
 interface Point {
@@ -40,13 +37,13 @@ interface Door {
   end: DoorPos;
   open: Boolean;
 }
-interface PointDistance extends Point {
-  distance: number;
-}
-interface RoomInfo {
-  points: PointDistance[];
-  door: Door[];
-}
+// interface PointDistance extends Point {
+//   distance: number;
+// }
+// interface RoomInfo {
+//   points: PointDistance[];
+//   door: Door[];
+// }
 
 interface Note {
   text: string;
@@ -86,10 +83,6 @@ const Directions = {
   NONE: "none",
 };
 
-function createPathFromShapes(shapes: Shape[]) {
-  var points = [];
-}
-//
 function findRoomsWithDoors(doors: OPDoor[], rects: Rect[]) {
   // 1. Map the doors by their coordinates
   const doorLookup = new Set(doors.map((d) => `${d.x},${d.y}`));
@@ -653,31 +646,31 @@ function reformatRooms(jsonText: string) {
 
 // DPI
 export function generateWalls(jsonText: string) {
-  const scale = 150;
+  // const scale = 150;
   // console.log(OBR.scene.items.getItems());
   // calculate positioning
 
-  var content: OPMap = JSON.parse(jsonText)!;
+  // var content: OPMap = JSON.parse(jsonText)!;
   let rfm = reformatRooms(jsonText)!;
 
   var commands: PathCommand[][] = rfm.commands;
   var metadata: Door[][] = rfm.metadata;
   console.log(metadata);
 
-  const bounds = content.rects.reduce(
-    (acc, rect) => ({
-      minX: Math.min(acc.minX, rect.x),
-      minY: Math.min(acc.minY, rect.y),
-      maxX: Math.max(acc.maxX, rect.x + rect.w),
-      maxY: Math.max(acc.maxY, rect.y + rect.h),
-    }),
-    {
-      minX: Infinity,
-      minY: Infinity,
-      maxX: -Infinity,
-      maxY: -Infinity,
-    },
-  );
+  // const bounds = content.rects.reduce(
+  //   (acc, rect) => ({
+  //     minX: Math.min(acc.minX, rect.x),
+  //     minY: Math.min(acc.minY, rect.y),
+  //     maxX: Math.max(acc.maxX, rect.x + rect.w),
+  //     maxY: Math.max(acc.maxY, rect.y + rect.h),
+  //   }),
+  //   {
+  //     minX: Infinity,
+  //     minY: Infinity,
+  //     maxX: -Infinity,
+  //     maxY: -Infinity,
+  //   },
+  // );
   //TODO: update to paths seperated by doors
   let paths: Path[] = [];
   for (const [index, c] of commands.entries()) {
