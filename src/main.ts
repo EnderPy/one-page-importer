@@ -4,12 +4,14 @@ import "./style.css";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
 import OBR, { buildWall, buildShape, isImage } from "@owlbear-rodeo/sdk";
+import { ListFormat } from "typescript";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
 
     <label for="jsonTextBox">Import JSON text</label>
     <br>
+    <input type="file" id="jsonFileUpload">
     <textarea id="jsonTextBox" class="fullSizeText" rows="22"></textarea>
 
       <br>
@@ -26,6 +28,12 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 // console.log(OBR.isAvailable);
 // console.log(OBR.isReady);
 
+interface Door {
+  start: { distance: number; index: number };
+  end: { distance: number; index: number };
+  open: Boolean;
+}
+
 OBR.onReady(() => {
   // console.log("OBR ready!");
   updateMapSelection();
@@ -35,33 +43,75 @@ OBR.onReady(() => {
       updateMapSelection();
     });
   OBR.scene.items.onChange(updateMapSelection);
+  // OBR.scene.items.onChange((items) => {
+  //   console.log(items);
+  // });
+  document
+    .querySelector<HTMLInputElement>("#jsonFileUpload")!
+    .addEventListener("change", (event) => {
+      const fileInput = event.target as HTMLInputElement;
+      if (!fileInput.files || fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const content = e.target?.result;
+        if (typeof content === "string") {
+          const textArea =
+            document.querySelector<HTMLTextAreaElement>("#jsonTextBox");
+          if (textArea) {
+            textArea.value = content;
+          }
+        }
+      };
+
+      reader.readAsText(file);
+    });
   document
     .querySelector<HTMLButtonElement>("#test")!
     .addEventListener("click", () => {
-      console.log("Fog:", OBR.player.hasPermission("FOG_CREATE"));
+      // console.log(OBR.scene.items.getItems());
 
-      const itema = buildShape()
-        .width(10)
-        .height(10)
-        .shapeType("CIRCLE")
-        .build();
-      OBR.scene.items.addItems([itema]);
-      var p = JSON.parse(
-        document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
-      );
-      console.log(p);
+      OBR.scene.items.getItems().then((item) => {
+        console.log(
+          item.map(
+            (v) => v.metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>,
+          ),
+        );
+        // (
+        //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
+        // ).push({
+        //   open: true,
+        //   start: { distance: 0, index: 0 },
+        //   end: { distance: 500, index: 0 },
+        // });
+      });
 
-      const item = buildWall().points(p).build();
-      console.log(item);
+      // console.log("Fog:", OBR.player.hasPermission("FOG_CREATE"));
 
-      OBR.scene.items.addItems([item]).then(
-        () => {
-          console.log("created item");
-        },
-        (reason) => {
-          console.log(reason);
-        },
-      );
+      // const itema = buildShape()
+      //   .width(10)
+      //   .height(10)
+      //   .shapeType("CIRCLE")
+      //   .build();
+      // OBR.scene.items.addItems([itema]);
+      // var p = JSON.parse(
+      //   document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
+      // );
+      // console.log(p);
+
+      // const item = buildWall().points(p).build();
+      // console.log(item);
+
+      // OBR.scene.items.addItems([item]).then(
+      //   () => {
+      //     console.log("created item");
+      //   },
+      //   (reason) => {
+      //     console.log(reason);
+      //   },
+      // );
     });
 
   document

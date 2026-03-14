@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/svg-arc-to-cubic-bezier": "^3.2.3",
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   },
   "dependencies": {
     "@owlbear-rodeo/sdk": "^3.1.0",
+    "svg-arc-to-cubic-bezier": "^3.2.0",
     "vite-console-forward-plugin": "^2.0.1"
   }
 }
