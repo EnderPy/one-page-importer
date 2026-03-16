@@ -21,7 +21,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <select name="images" id="mapSelect" ></select>
       <br>
       <button id="importJSONButton">Import JSON</button>
-      <button id="test">Test</button>
+      <!-- <button id="test">Test</button> -->
 
   </div> 
 `;
@@ -66,26 +66,26 @@ OBR.onReady(() => {
 
       reader.readAsText(file);
     });
-  document
-    .querySelector<HTMLButtonElement>("#test")!
-    .addEventListener("click", () => {
-      // console.log(OBR.scene.items.getItems());
+  // document
+  //   .querySelector<HTMLButtonElement>("#test")!
+  //   .addEventListener("click", () => {
+  //     // console.log(OBR.scene.items.getItems());
 
-      OBR.scene.items.getItems(isImage).then((item) => {
-        console.log(item);
-        // (
-        //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
-        // ).push({
-        //   open: true,
-        //   start: { distance: 0, index: 0 },
-        //   end: { distance: 500, index: 0 },
-        // });
-      });
-    });
+  //     OBR.scene.items.getItems(isImage).then((item) => {
+  //       // console.log(item);
+  //       // (
+  //       //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
+  //       // ).push({
+  //       //   open: true,
+  //       //   start: { distance: 0, index: 0 },
+  //       //   end: { distance: 500, index: 0 },
+  //       // });
+  //     });
+  //   });
   document
     .querySelector<HTMLSelectElement>("#mapSelect")
     ?.addEventListener("change", (ev) => {
-      console.log(ev);
+      // console.log(ev);
       if ((ev.target as HTMLSelectElement).value == "NONE") {
         currentPos = { x: 0, y: 0 };
         return;
@@ -100,7 +100,7 @@ OBR.onReady(() => {
     .querySelector<HTMLButtonElement>("#importJSONButton")!
     .addEventListener("click", (ev) => {
       ev.preventDefault();
-      console.log(currentPos);
+      // console.log(currentPos);
       generateWalls(
         document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
         currentPos,

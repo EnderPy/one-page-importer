@@ -229,7 +229,7 @@ const distance = (comm: PathCommand[]) => {
   }
   return m;
 };
-/*
+/* Door Types (from watabou)
 public static inline var EMPTY		= 0;
 public static inline var NORMAL		= 1;!!
 public static inline var ARCHWAY	= 2;
@@ -250,17 +250,6 @@ function reformatRooms(jsonText: string) {
   const content: OPMap = JSON.parse(jsonText);
   const scale = 150;
 
-  // make copy that will be returned
-  // var newContent: OPMap = {
-  //   title: content.title,
-  //   version: content.version,
-  //   story: content.story,
-  //   doors: content.doors,
-  //   notes: content.notes,
-  //   water: content.water,
-  //   rects: [],
-  //   columns: content.columns,
-  // };
   const bounds = content.rects.reduce(
     (acc, rect) => ({
       minX: Math.min(acc.minX, rect.x),
@@ -334,15 +323,6 @@ function reformatRooms(jsonText: string) {
     if (rect.doors) b.doors = rect.doors;
     return b;
   };
-  // const drawDoors = (current: Point, next: Point) => {
-  //   return doorBounds.filter(
-  //     (door: Bounds, index) =>
-  //       (door.minX <= Math.min(current.x, next.x) &&
-  //         door.maxX >= Math.max(current.x, next.x)) ||
-  //       (door.minY <= Math.min(current.y, next.y) &&
-  //         door.maxY >= Math.max(current.y, next.y)),
-  //   );
-  // };
 
   for (const r of roomGroups) {
     // go North, East, South, West.
@@ -387,17 +367,7 @@ function reformatRooms(jsonText: string) {
         x: roomBounds.minX + (roomBounds.maxX - roomBounds.minX) / 2,
         y: roomBounds.minY + (roomBounds.maxY - roomBounds.minY) / 2,
       };
-      // roomCommands.push([Command.MOVE.x.y]);
 
-      // var toDrawDoors: Bounds[];
-      // roomCommands.push([
-      //   Command.QUAD,
-      //   roomBounds.minX,
-      //   roomBounds.maxY,
-
-      //   roomBounds.maxX,
-      //   roomBounds.maxY,
-      // ]);
       var circlePoints: Point[] = [
         { x: roomBounds.minX, y: pivot.y + 75 },
         { x: roomBounds.minX, y: pivot.y - 75 },
@@ -442,21 +412,13 @@ function reformatRooms(jsonText: string) {
           // console.log(direction, toDrawDoors);
 
           if (toDrawDoors.length !== 0) {
-            // toDrawDoors.sort((a, b) => {
-            //   if (direction == Directions.RIGHT || direction == Directions.UP) {
-            //     // Sort max < min
-            //     return a.maxX - b.minX;
-            //   }
-            //   //
-            //   return b.minX - a.maxX;
-            // });
             toDrawDoors.forEach((door) => {
               let d: Door = {
                 start: { distance: 0, index: 0 },
                 end: { distance: 0, index: 0 },
                 open: (() => {
                   if (!door.doors) return false;
-                  console.log(door.doors);
+                  // console.log(door.doors);
 
                   return getDoorOpen(door.doors[0].type);
                 })(),
@@ -596,7 +558,7 @@ function reformatRooms(jsonText: string) {
             end: { distance: 0, index: 0 },
             open: (() => {
               if (!door.doors) return false;
-              console.log(door.doors);
+              // console.log(door.doors);
 
               return getDoorOpen(door.doors[0].type);
             })(),
@@ -661,7 +623,6 @@ function reformatRooms(jsonText: string) {
     commands.push(roomCommands);
     doorMetadatas.push(doorRoomMetadata);
   }
-  // console.log(commands);
 
   return { commands: commands, metadata: doorMetadatas };
 }
@@ -671,32 +632,11 @@ export function generateWalls(
   jsonText: string,
   position: Point = { x: 0, y: 0 },
 ) {
-  // const scale = 150;
-  // console.log(OBR.scene.items.getItems());
-  // calculate positioning
-
-  // var content: OPMap = JSON.parse(jsonText)!;
   let rfm = reformatRooms(jsonText)!;
 
   var commands: PathCommand[][] = rfm.commands;
   var metadata: Door[][] = rfm.metadata;
-  // console.log(metadata);
 
-  // const bounds = content.rects.reduce(
-  //   (acc, rect) => ({
-  //     minX: Math.min(acc.minX, rect.x),
-  //     minY: Math.min(acc.minY, rect.y),
-  //     maxX: Math.max(acc.maxX, rect.x + rect.w),
-  //     maxY: Math.max(acc.maxY, rect.y + rect.h),
-  //   }),
-  //   {
-  //     minX: Infinity,
-  //     minY: Infinity,
-  //     maxX: -Infinity,
-  //     maxY: -Infinity,
-  //   },
-  // );
-  //TODO: update to paths seperated by doors
   let paths: Path[] = [];
   for (const [index, c] of commands.entries()) {
     let d = buildPath().commands(c).layer("FOG").position(position);
@@ -711,44 +651,13 @@ export function generateWalls(
   }
 
   // console.log(paths);
-  OBR.scene.items.addItems(paths).then(
-    () => {
-      console.log("created items");
-    },
-    (reason) => {
-      console.log(reason);
-    },
-  );
-  // const walls: Array<Shape> = [];
-  // content.rects.forEach((rect) => {
-  //   const normalX = rect.x - bounds.minX + 1;
-  //   const normalY = rect.y - bounds.minY + 1;
-
-  //   if (rect.rotunda) {
-  //     let wall = buildShape()
-  //       .shapeType("CIRCLE")
-  //       .width((Math.sqrt(0.25 + rect.w ** 2) + 0.2) * scale)
-  //       .height((Math.sqrt(0.25 + rect.h ** 2) + 0.2) * scale)
-  //       .position({
-  //         x: (normalX + rect.w / 2) * scale,
-  //         y: (normalY + rect.h / 2) * scale,
-  //       })
-  //       .layer("FOG")
-  //       .build();
-  //     walls.push(wall);
-  //   } else {
-  //     let wall = buildShape()
-  //       .shapeType("RECTANGLE")
-  //       .width(rect.w * scale)
-  //       .height(rect.h * scale)
-  //       .position({
-  //         x: normalX * scale,
-  //         y: normalY * scale,
-  //       })
-  //       .layer("FOG")
-  //       .build();
-  //     walls.push(wall);
-  //   }
-  //   // OBR.scene.local.addItems([wall]);\
-  // });
+  OBR.scene.items.addItems(paths);
+  // .then(
+  //   () => {
+  //     // console.log("created items");
+  //   },
+  //   (reason) => {
+  //     console.log(reason);
+  //   },
+  // );
 }
