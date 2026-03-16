@@ -172,7 +172,7 @@ function approximateArc(centre: Point, p1: Point, p2: Point): PathCommand[] {
 const diff = (a: Point, b: Point) => {
   return { x: a.x - b.x, y: a.y - b.y };
 };
-const distance = (comm: PathCommand[], centre: Point = { x: 0, y: 0 }) => {
+const distance = (comm: PathCommand[]) => {
   var m = 0;
   var prev: Point | null = null;
   for (const C of comm) {
@@ -387,7 +387,7 @@ function reformatRooms(jsonText: string) {
         x: roomBounds.minX + (roomBounds.maxX - roomBounds.minX) / 2,
         y: roomBounds.minY + (roomBounds.maxY - roomBounds.minY) / 2,
       };
-      // roomCommands.push([Command.MOVE, pivot.x, pivot.y]);
+      // roomCommands.push([Command.MOVE.x.y]);
 
       // var toDrawDoors: Bounds[];
       // roomCommands.push([
@@ -464,37 +464,37 @@ function reformatRooms(jsonText: string) {
               if (direction == Directions.RIGHT) {
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
-                d.start.distance = distance(roomCommands, pivot) + gap;
+                d.start.distance = distance(roomCommands) + gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
-                d.end.distance = distance(roomCommands, pivot) - gap;
+                d.end.distance = distance(roomCommands) - gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
               } else if (direction == Directions.LEFT) {
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-                d.start.distance = distance(roomCommands, pivot) + gap;
+                d.start.distance = distance(roomCommands) + gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
-                d.end.distance = distance(roomCommands, pivot) - gap;
+                d.end.distance = distance(roomCommands) - gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
               } else if (direction == Directions.DOWN) {
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
-                d.start.distance = distance(roomCommands, pivot) + gap;
+                d.start.distance = distance(roomCommands) + gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-                d.end.distance = distance(roomCommands, pivot) - gap;
+                d.end.distance = distance(roomCommands) - gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
               } else if (direction == Directions.UP) {
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
-                d.start.distance = distance(roomCommands, pivot) + gap;
+                d.start.distance = distance(roomCommands) + gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
-                d.end.distance = distance(roomCommands, pivot) - gap;
+                d.end.distance = distance(roomCommands) - gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
               }
