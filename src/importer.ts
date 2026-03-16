@@ -23,6 +23,7 @@ interface Rect extends Point {
 interface OPDoor extends Point {
   dir: Point;
   type: number;
+  open?: boolean;
 }
 interface DoorRoom extends Rect {
   doors?: OPDoor[];
@@ -115,10 +116,10 @@ function updateDoorRooms(doors: OPDoor[], rects: Rect[]) {
     if (d.dir.x != 0) {
       // left/ right door, split x into 2
       rooms.push({ x: d.x, y: d.y, w: 0.5, h: 1, doors: [d] });
-      rooms.push({ x: d.x + 0.5, y: d.y, w: 0.5, h: 1, doors: [d] });
+      rooms.push({ x: d.x + 0.5, y: d.y, w: 0.5, h: 1 });
     } else {
       rooms.push({ x: d.x, y: d.y, w: 1, h: 0.5, doors: [d] });
-      rooms.push({ x: d.x, y: d.y + 0.5, w: 1, h: 0.5, doors: [d] });
+      rooms.push({ x: d.x, y: d.y + 0.5, w: 1, h: 0.5 });
     }
   });
 
@@ -175,7 +176,7 @@ const distance = (comm: PathCommand[], centre: Point = { x: 0, y: 0 }) => {
   var m = 0;
   var prev: Point | null = null;
   for (const C of comm) {
-    let current = { x: C[1]!, y: C[2]! };
+    var current = { x: C[1]!, y: C[2]! };
     if (!prev) {
       prev = current;
       continue;
@@ -188,22 +189,37 @@ const distance = (comm: PathCommand[], centre: Point = { x: 0, y: 0 }) => {
         })();
         break;
       case Command.CUBIC:
-        m += ((center, p1, p2, clockwise = true) => {
-          const r = Math.sqrt(
-            Math.pow(p1.x - center.x, 2) + Math.pow(p1.y - center.y, 2),
-          );
+        current = { x: C[5], y: C[6]! };
+        let cp1 = { x: C[1]!, y: C[2]! };
+        let cp2 = { x: C[3]!, y: C[4]! };
+        m += ((p1, p2, cp1, cp2) => {
+          const steps = 100; // Number of steps for approximation
+          let t = 0;
+          let prevPoint = p1;
+          let length = 0;
 
-          const theta1 = Math.atan2(p1.y - center.y, p1.x - center.x);
-          const theta2 = Math.atan2(p2.y - center.y, p2.x - center.x);
+          for (let i = 1; i <= steps; i++) {
+            t = i / steps;
+            const x =
+              Math.pow(1 - t, 3) * p1.x +
+              3 * Math.pow(1 - t, 2) * t * cp1.x +
+              3 * (1 - t) * Math.pow(t, 2) * cp2.x +
+              Math.pow(t, 3) * p2.x;
+            const y =
+              Math.pow(1 - t, 3) * p1.y +
+              3 * Math.pow(1 - t, 2) * t * cp1.y +
+              3 * (1 - t) * Math.pow(t, 2) * cp2.y +
+              Math.pow(t, 3) * p2.y;
 
-          let deltaTheta = theta2 - theta1;
+            const currentPoint = { x, y };
+            const dx = currentPoint.x - prevPoint.x;
+            const dy = currentPoint.y - prevPoint.y;
+            length += Math.sqrt(dx * dx + dy * dy);
+            prevPoint = currentPoint;
+          }
 
-          // Adjust for sweep direction
-          if (clockwise && deltaTheta < 0) deltaTheta += 2 * Math.PI;
-          if (!clockwise && deltaTheta > 0) deltaTheta -= 2 * Math.PI;
-
-          return r * Math.abs(deltaTheta);
-        })(centre, prev, current, true);
+          return length;
+        })(prev, current, cp1, cp2);
         break;
 
       default:
@@ -213,6 +229,22 @@ const distance = (comm: PathCommand[], centre: Point = { x: 0, y: 0 }) => {
   }
   return m;
 };
+/*
+public static inline var EMPTY		= 0;
+public static inline var NORMAL		= 1;!!
+public static inline var ARCHWAY	= 2;
+public static inline var STAIRS		= 3;
+public static inline var PORTCULLIS	= 4;
+public static inline var SPECIAL	= 5;!!
+public static inline var SECRET		= 6;
+public static inline var BARRED		= 7;
+public static inline var EXIT		= 8;
+public static inline var STEPS		= 9;
+*/
+function getDoorOpen(type: number): Boolean {
+  if ([0, 2, 9].includes(type)) return true;
+  return false;
+}
 
 function reformatRooms(jsonText: string) {
   const content: OPMap = JSON.parse(jsonText);
@@ -257,7 +289,7 @@ function reformatRooms(jsonText: string) {
   // update update A to split rooms only
   let c: DoorRoom[] = updateDoorRooms(content.doors, a);
 
-  const findRoomsInRange = (rects: Rect[], range: Rect): Rect[] => {
+  const findRoomsInRange = (rects: DoorRoom[], range: Rect): Rect[] => {
     return rects.filter((room) => {
       // Check if room overlaps horizontally
       const isWithinX = room.x < range.x + range.w && room.x + room.w > range.x;
@@ -270,7 +302,7 @@ function reformatRooms(jsonText: string) {
     });
   };
   // foreach full room, find nearby rooms from the doors category
-  const roomGroups: Rect[][] = [];
+  const roomGroups: DoorRoom[][] = [];
   var range = 0.5;
 
   for (const room of b) {
@@ -335,17 +367,10 @@ function reformatRooms(jsonText: string) {
     ];
     // Round wallls, FML
 
-    // Print x and y for each corner point
-    // doorPoints.forEach((p, i) =>
-    //   // console.log(`doorPoint[${i}] -> x: ${p.x}, y: ${p.y}`),
-    // );
-
-    // Print x and y for each door associated with this room
-    // doors.forEach((d, i) => console.log(`door[${i}] -> x: ${d.x}, y: ${d.y}`));
-
     var roomCommands: PathCommand[] = [];
     var doorRoomMetadata: Door[] = [];
     current = wallPoints.shift()!;
+    var gap = 0;
 
     // next = doorPoints.shift()!;
     doors.forEach((door) => {
@@ -425,63 +450,56 @@ function reformatRooms(jsonText: string) {
             //   //
             //   return b.minX - a.maxX;
             // });
-
             toDrawDoors.forEach((door) => {
               let d: Door = {
                 start: { distance: 0, index: 0 },
                 end: { distance: 0, index: 0 },
-                open: false,
+                open: (() => {
+                  if (!door.doors) return false;
+                  console.log(door.doors);
+
+                  return getDoorOpen(door.doors[0].type);
+                })(),
               };
               if (direction == Directions.RIGHT) {
-                // console.log("Drawing door in Directions.RIGHT");
-
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
-                d.start.distance = distance(roomCommands, pivot);
+                d.start.distance = distance(roomCommands, pivot) + gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
-                d.end.distance = distance(roomCommands, pivot);
+                d.end.distance = distance(roomCommands, pivot) - gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
               } else if (direction == Directions.LEFT) {
-                // console.log("Drawing door in Directions.LEFT");
-
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-                d.start.distance = distance(roomCommands, pivot);
+                d.start.distance = distance(roomCommands, pivot) + gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
-                d.end.distance = distance(roomCommands, pivot);
+                d.end.distance = distance(roomCommands, pivot) - gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
-              }
-
-              // up down
-              else if (direction == Directions.DOWN) {
-                // console.log("Drawing door in Directions.DOWN", door);
-
+              } else if (direction == Directions.DOWN) {
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
-                d.start.distance = distance(roomCommands, pivot);
+                d.start.distance = distance(roomCommands, pivot) + gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-                d.end.distance = distance(roomCommands, pivot);
+                d.end.distance = distance(roomCommands, pivot) - gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
               } else if (direction == Directions.UP) {
-                // console.log("Drawing door in Directions.UP");
-
                 roomCommands.push([Command.LINE, door.maxX, door.maxY]);
                 roomCommands.push([Command.LINE, door.minX, door.maxY]);
-                d.start.distance = distance(roomCommands, pivot);
+                d.start.distance = distance(roomCommands, pivot) + gap;
 
                 roomCommands.push([Command.LINE, door.minX, door.minY]);
-                d.end.distance = distance(roomCommands, pivot);
+                d.end.distance = distance(roomCommands, pivot) - gap;
 
                 roomCommands.push([Command.LINE, door.maxX, door.minY]);
               }
-              // console.log("door", d);
-              doors.push(d);
+              if (door.doors?.length !== undefined && door.doors?.length > 0)
+                doors.push(d);
             });
           } else {
             // draw blank arc
@@ -576,7 +594,12 @@ function reformatRooms(jsonText: string) {
           let d: Door = {
             start: { distance: 0, index: 0 },
             end: { distance: 0, index: 0 },
-            open: false,
+            open: (() => {
+              if (!door.doors) return false;
+              console.log(door.doors);
+
+              return getDoorOpen(door.doors[0].type);
+            })(),
           };
 
           // calculate distance
@@ -584,39 +607,38 @@ function reformatRooms(jsonText: string) {
           if (direction == Directions.RIGHT) {
             roomCommands.push([Command.LINE, door.minX, door.maxY]);
             roomCommands.push([Command.LINE, door.minX, door.minY]);
-            d.start.distance = distance(roomCommands);
+            d.start.distance = distance(roomCommands) + gap;
             roomCommands.push([Command.LINE, door.maxX, door.minY]);
-            d.end.distance = distance(roomCommands);
+            d.end.distance = distance(roomCommands) - gap;
             roomCommands.push([Command.LINE, door.maxX, door.maxY]);
           } else if (direction == Directions.LEFT) {
             roomCommands.push([Command.LINE, door.maxX, door.minY]);
             roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-            d.start.distance = distance(roomCommands);
+            d.start.distance = distance(roomCommands) + gap;
             roomCommands.push([Command.LINE, door.minX, door.maxY]);
-            d.end.distance = distance(roomCommands);
+            d.end.distance = distance(roomCommands) - gap;
             roomCommands.push([Command.LINE, door.minX, door.minY]);
-          }
-          // up down
-          else if (direction == Directions.DOWN) {
+          } else if (direction == Directions.DOWN) {
             roomCommands.push([Command.LINE, door.minX, door.minY]);
             roomCommands.push([Command.LINE, door.maxX, door.minY]);
-            d.start.distance = distance(roomCommands);
+            d.start.distance = distance(roomCommands) + gap;
 
             roomCommands.push([Command.LINE, door.maxX, door.maxY]);
-            d.end.distance = distance(roomCommands);
+            d.end.distance = distance(roomCommands) - gap;
 
             roomCommands.push([Command.LINE, door.minX, door.maxY]);
           } else if (direction == Directions.UP) {
             roomCommands.push([Command.LINE, door.maxX, door.maxY]);
             roomCommands.push([Command.LINE, door.minX, door.maxY]);
-            d.start.distance = distance(roomCommands);
+            d.start.distance = distance(roomCommands) + gap;
 
             roomCommands.push([Command.LINE, door.minX, door.minY]);
-            d.end.distance = distance(roomCommands);
+            d.end.distance = distance(roomCommands) - gap;
 
             roomCommands.push([Command.LINE, door.maxX, door.minY]);
           }
-          doors.push(d);
+          if (door.doors?.length !== undefined && door.doors?.length > 0)
+            doors.push(d);
         });
 
         if (

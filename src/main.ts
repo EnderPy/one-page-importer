@@ -86,7 +86,10 @@ OBR.onReady(() => {
     .querySelector<HTMLSelectElement>("#mapSelect")
     ?.addEventListener("change", (ev) => {
       console.log(ev);
-
+      if ((ev.target as HTMLSelectElement).value == "NONE") {
+        currentPos = { x: 0, y: 0 };
+        return;
+      }
       OBR.scene.items
         .getItems([(ev.target as HTMLSelectElement).value])
         .then((item) => {
@@ -117,6 +120,10 @@ function updateMapSelection(): void {
 
     // Clear existing options
     select.innerHTML = "";
+    let o = document.createElement("option");
+    o.value = "NONE";
+    o.textContent = "No Offset";
+    select.appendChild(o);
 
     // Add an option for each image found in the scene
     images
@@ -138,6 +145,8 @@ function updateMapSelection(): void {
         )
       ) {
         select.value = selectedValue;
+      } else {
+        // revert offset value
       }
     }
   });
