@@ -26,12 +26,36 @@ jobs:
       run: |
         npm install
         npm run build
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      permissions:
-        contents: write
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-      permissions:
-        contents: write
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+    
+        strategy:
+          matrix:
+            node-version: [ 22.x]
+    
+        steps:
+        - uses: actions/checkout@v4
+    
+        - name: Use Node.js ${{ matrix.node-version }}
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ matrix.node-version }}
+    
+        - name: Build
+          run: |
+            npm install
+            npm run build
+    
+      deploy:
+        needs: build
+        runs-on: ubuntu-latest
+    
+        steps:
+        - name: Deploy to GitHub Pages
+          uses: peaceiris/actions-gh-pages@v4
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./dist
+          permissions:
+            contents: write
