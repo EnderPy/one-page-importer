@@ -7,74 +7,15 @@ import OBR, {
 } from "@owlbear-rodeo/sdk";
 import arcToBezier, { type CubicBezierCurve } from "svg-arc-to-cubic-bezier";
 
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface Rect extends Point {
-  w: number;
-  h: number;
-  rotunda?: boolean;
-  ending?: boolean;
-  roomID?: string;
-}
-
-interface OPDoor extends Point {
-  dir: Point;
-  type: number;
-  open?: boolean;
-}
-interface DoorRoom extends Rect {
-  doors?: OPDoor[];
-}
-interface DoorPos {
-  distance: number;
-  index: number;
-}
-
-interface Door {
-  start: DoorPos;
-  end: DoorPos;
-  open: Boolean;
-}
-// interface PointDistance extends Point {
-//   distance: number;
-// }
-// interface RoomInfo {
-//   points: PointDistance[];
-//   door: Door[];
-// }
-
-interface Note {
-  text: string;
-  ref: string;
-  pos: Point;
-}
-
-interface Bounds {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-  rotunda?: boolean;
-  ending?: boolean;
-  roomID?: string;
-  doors?: OPDoor[];
-}
-/**
- * The full schema for the Mountain Temple data
- */
-interface OPMap {
-  version: string;
-  title: string;
-  story: string;
-  rects: Rect[];
-  doors: OPDoor[];
-  notes: Note[];
-  columns: Point[];
-  water: any[]; // Use Point[] or Rect[] here if water follows those structures
-}
+import type {
+  Point,
+  Rect,
+  OPDoor,
+  DoorRoom,
+  Door,
+  Bounds,
+  OPMap,
+} from "./types";
 
 const Directions = {
   RIGHT: "right",
@@ -769,7 +710,6 @@ export function generateWalls(
       d = d.metadata({
         "rodeo.owlbear.dynamic-fog/doors": metadata.at(index),
         "com.desain.chromodynamic/doors": metadata.at(index), //https://github.com/desain/dynamic-fog
-        
       });
     }
     paths.push(d.build());

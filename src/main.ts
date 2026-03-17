@@ -3,7 +3,8 @@ import "./style.css";
 // import viteLogo from "/vite.svg";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
-import OBR, { isImage } from "@owlbear-rodeo/sdk";
+import { generateSVGWalls } from "./SVGImport";
+import OBR, { isImage, type Image } from "@owlbear-rodeo/sdk";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -21,6 +22,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <select name="images" id="mapSelect" ></select>
       <br>
       <button id="importJSONButton">Import JSON</button>
+      <button id="importSVGButton">Import SVG</button>
+
       <!-- <button id="test">Test</button> -->
 
   </div> 
@@ -44,6 +47,7 @@ OBR.onReady(() => {
   //   console.log(items);
   // });
   var currentPos = { x: 0, y: 0 };
+  var currentImage: Image | null = null;
   document
     .querySelector<HTMLInputElement>("#jsonFileUpload")!
     .addEventListener("change", (event) => {
@@ -88,12 +92,16 @@ OBR.onReady(() => {
       // console.log(ev);
       if ((ev.target as HTMLSelectElement).value == "NONE") {
         currentPos = { x: 0, y: 0 };
+        currentImage = null;
+
         return;
       }
       OBR.scene.items
         .getItems([(ev.target as HTMLSelectElement).value])
         .then((item) => {
           currentPos = item[0].position;
+          currentImage = item[0] as Image;
+          // currentPos = item[0].scale;
         });
     });
   document
@@ -115,8 +123,27 @@ OBR.onReady(() => {
         }
       });
     });
+  document
+    .querySelector<HTMLButtonElement>("#importSVGButton")!
+    ?.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      console.log(currentPos);
+      OBR.player.hasPermission("FOG_CREATE").then((v) => {
+        if (v)
+          generateSVGWalls(
+            document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
+            currentImage
+          );
+        else {
+          OBR.notification.show(
+            'Fog import failed, you do not have "FOG_CREATE" permissions',
+            "ERROR",
+          );
+        }
+      });
+    });
 
-  OBR.scene.items.getItems();
+  // OBR.scene.items.getItems();
 });
 
 function updateMapSelection(): void {
