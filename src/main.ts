@@ -101,10 +101,19 @@ OBR.onReady(() => {
     .addEventListener("click", (ev) => {
       ev.preventDefault();
       // console.log(currentPos);
-      generateWalls(
-        document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
-        currentPos,
-      );
+      OBR.player.hasPermission("FOG_CREATE").then((v) => {
+        if (v)
+          generateWalls(
+            document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
+            currentPos,
+          );
+        else {
+          OBR.notification.show(
+            'Fog import failed, you do not have "FOG_CREATE" permissions',
+            "ERROR",
+          );
+        }
+      });
     });
 
   OBR.scene.items.getItems();

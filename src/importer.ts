@@ -765,8 +765,11 @@ export function generateWalls(
     if (metadata[index]) {
       // console.log(metadata.at(index));
 
+      // support other fog options
       d = d.metadata({
         "rodeo.owlbear.dynamic-fog/doors": metadata.at(index),
+        "com.desain.chromodynamic/doors": metadata.at(index), //https://github.com/desain/dynamic-fog
+        
       });
     }
     paths.push(d.build());
