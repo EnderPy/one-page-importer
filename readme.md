@@ -18,7 +18,9 @@ Import Maps from Watabous' One Page Dungeon using his JSON export. Features inte
 
 ## Video
 
-![video showcasing the program importing JSON from one-page-dungeon generator](public/preview.mp4)
+
+https://github.com/user-attachments/assets/93d7c20f-6865-4906-9396-dec662087685
+
 
 ## Installation
 
@@ -26,3 +28,5 @@ manifest file: `https://enderpy.github.io/one-page-importer/manifest.json`
 
 
 thanks to watabou for his amazing tool and source for this project, https://watabou.github.io/one-page-dungeon/
+
+
