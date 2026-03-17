@@ -15,6 +15,10 @@ Import Maps from Watabous' One Page Dungeon using his JSON export. Features inte
   - import certain props for fog blocking (columns for example)
   - some corridors have doors throughout (Likely his logic), remove these from importing automatically
 
+## Video
+
+![video showcasing the program importing JSON from one-page-dungeon generator](public/preview.mp4)
+
 ## Installation
 
 manifest file: `https://enderpy.github.io/one-page-importer/manifest.json`
