@@ -116,10 +116,19 @@ function updateDoorRooms(doors: OPDoor[], rects: Rect[]) {
     if (d.dir.x != 0) {
       // left/ right door, split x into 2
       rooms.push({ x: d.x, y: d.y, w: 0.5, h: 1, doors: [d] });
-      rooms.push({ x: d.x + 0.5, y: d.y, w: 0.5, h: 1 });
+      // add door code if it is a secret door
+      if (d.type == doorTypes.SECRET) {
+        rooms.push({ x: d.x + 0.5, y: d.y, w: 0.5, h: 1, doors: [d] });
+      } else {
+        rooms.push({ x: d.x + 0.5, y: d.y, w: 0.5, h: 1 });
+      }
     } else {
       rooms.push({ x: d.x, y: d.y, w: 1, h: 0.5, doors: [d] });
-      rooms.push({ x: d.x, y: d.y + 0.5, w: 1, h: 0.5 });
+      if (d.type == doorTypes.SECRET) {
+        rooms.push({ x: d.x, y: d.y + 0.5, w: 1, h: 0.5, doors: [d] });
+      } else {
+        rooms.push({ x: d.x, y: d.y + 0.5, w: 1, h: 0.5 });
+      }
     }
   });
 
@@ -229,6 +238,7 @@ const distance = (comm: PathCommand[]) => {
   }
   return m;
 };
+
 /* Door Types (from watabou)
 public static inline var EMPTY		= 0;
 public static inline var NORMAL		= 1;!!
@@ -241,6 +251,18 @@ public static inline var BARRED		= 7;
 public static inline var EXIT		= 8;
 public static inline var STEPS		= 9;
 */
+const doorTypes = {
+  EMPTY: 0,
+  NORMAL: 1,
+  ARCHWAY: 2,
+  STAIRS: 3,
+  PORTCULLIS: 4,
+  SPECIAL: 5,
+  SECRET: 6,
+  BARRED: 7,
+  EXIT: 8,
+  STEPS: 9,
+};
 function getDoorOpen(type: number): Boolean {
   if ([0, 2, 9].includes(type)) return true;
   return false;
@@ -293,9 +315,108 @@ function reformatRooms(jsonText: string) {
   // foreach full room, find nearby rooms from the doors category
   const roomGroups: DoorRoom[][] = [];
   var range = 0.5;
+  let noSecrets = c.filter((v) => {
+    if (v.doors && v.doors[0].type == doorTypes.SECRET) return false;
+    return true;
+  });
 
+  for (const secretDoor of c.filter(
+    (v) => v.doors && v.doors[0].type == doorTypes.SECRET,
+  )) {
+    if (!secretDoor.doors) continue;
+    let d = secretDoor.doors[0];
+    if (d.dir.x < 0 && Math.floor(secretDoor.x) !== secretDoor.x) {
+      // is part of walls
+      // split into 3
+      roomGroups.push([
+        // base room
+        {
+          x: secretDoor.x,
+          y: secretDoor.y,
+          w: 1 / 4,
+          h: 1,
+        },
+        {
+          x: secretDoor.x + 1 / 4,
+          y: secretDoor.y,
+          w: 1 / 4,
+          h: 1,
+          doors: [d],
+        },
+      ]);
+      continue;
+    }
+    if (d.dir.x > 0 && Math.floor(secretDoor.x) == secretDoor.x) {
+      // is part of walls
+      // split into 3
+      roomGroups.push([
+        // base room
+
+        {
+          x: secretDoor.x + 1 / 4,
+          y: secretDoor.y,
+          w: 1 / 4,
+          h: 1,
+        },
+        {
+          x: secretDoor.x,
+          y: secretDoor.y,
+          w: 1 / 4,
+          h: 1,
+          doors: [d],
+        },
+      ]);
+      continue;
+    }
+    if (d.dir.y < 0 && Math.floor(secretDoor.y) !== secretDoor.y) {
+      // is part of walls
+      // split into 3
+      // add to roomGroups
+      roomGroups.push([
+        // base room
+        {
+          x: secretDoor.x,
+          y: secretDoor.y,
+          w: 1,
+          h: 1 / 4,
+        },
+        {
+          x: secretDoor.x,
+          y: secretDoor.y + 1 / 4,
+          w: 1,
+          h: 1 / 4,
+          doors: [d],
+        },
+      ]);
+      continue;
+    }
+    if (d.dir.y > 0 && Math.floor(secretDoor.y) == secretDoor.y) {
+      // is part of walls
+      // split into 3
+      roomGroups.push([
+        // base room
+
+        {
+          x: secretDoor.x,
+          y: secretDoor.y + 1 / 4,
+          w: 1,
+          h: 1 / 4,
+        },
+        {
+          x: secretDoor.x,
+          y: secretDoor.y,
+          w: 1,
+          h: 1 / 4,
+          doors: [d],
+        },
+      ]);
+      continue;
+    }
+    // is a part of room interior, re-add to noSecrets
+    noSecrets.push(secretDoor);
+  }
   for (const room of b) {
-    const nearbyRooms = findRoomsInRange(c, {
+    const nearbyRooms = findRoomsInRange(noSecrets, {
       x: room.x - range,
       y: room.y - range,
       w: room.w + 2 * range,
@@ -303,6 +424,7 @@ function reformatRooms(jsonText: string) {
     });
     roomGroups.push([room, ...nearbyRooms]);
   }
+
   // console.log("Room Groups:", roomGroups);
 
   // convert roomGroups to paths
