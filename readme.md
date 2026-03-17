@@ -10,6 +10,7 @@ Import Maps from Watabous' One Page Dungeon using his JSON export. Features inte
   - imports doors, and will open doors that are shown as open
 
   TODO: 
+  - Secret doors do not yet work, and show the wall segment
   - add user-editable variables
   - modify door logic to allow for doors at 1/4 positions
   - import certain props for fog blocking (columns for example)
