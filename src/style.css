@@ -45,6 +45,7 @@ button {
     border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
     color 250ms cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: bold;
+  cursor: pointer;
 }
 
 button:hover {
@@ -103,10 +104,10 @@ fieldset:hover {
 #app[data-theme="LIGHT"] fieldset:hover {
   border-color: rgba(0, 0, 0, 0.87);
 }
-/* details {
-  display: flex;
-  flex-direction: column;
-} */
+details {
+  cursor: pointer;
+
+}
 
 .fullSizeText {
   flex-grow: 1;
@@ -126,6 +127,7 @@ select {
   border-radius: 8px;
   max-width: 100%;
   width: 100%;
+  cursor: pointer;
   
   background: transparent;
 }
