@@ -4,7 +4,7 @@ import OBR, {
   type Image,
   type PathCommand,
 } from "@owlbear-rodeo/sdk";
-import type { Bounds, Scale2D, Transform2D } from "./types";
+import type { Scale2D, Transform2D } from "./types";
 
 function parseXML(SVG: string): Document {
   const parser = new DOMParser();
@@ -92,30 +92,14 @@ export function generateSVGWalls(
   }
 
   if (!path) return;
-  console.log(path);
+  // console.log(path);
   const commands = formatSVGToOBRPath(path);
-
-  const bounds: Bounds = commands.reduce(
-    (prev, cur) => {
-      if (cur[0] === Command.MOVE || cur[0] === Command.LINE) {
-        const [, x, y] = cur;
-        return {
-          minX: Math.min(prev.minX, x),
-          minY: Math.min(prev.minY, y),
-          maxX: Math.max(prev.maxX, x),
-          maxY: Math.max(prev.maxY, y),
-        };
-      }
-      return prev;
-    },
-    { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity },
-  );
 
   if (image) {
     let grid = image.grid;
     grid.offset;
     // console.log(image.image, scale, grid);
-    console.log(transform, bounds);
+    // console.log(transform, bounds);
 
     OBR.scene.items.addItems([
       buildPath()

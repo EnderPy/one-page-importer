@@ -4,22 +4,36 @@ import "./style.css";
 // import { setupCounter } from "./counter.ts";
 import { generateWalls } from "./importer";
 import { generateSVGWalls } from "./SVGImport";
-import OBR, { isImage, type Image } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, type Image, type Theme } from "@owlbear-rodeo/sdk";
+import type { Point } from "./types";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div>
-<h3>One Page Dungeon Importer</h3>
-    <label for="jsonFileUpload">Import JSON file</label>
+  <div class="appWrapper">
+    <span class="headerText">One Page Dungeon Importer</span>
+    <fieldset>
+      <legend>Import File</legend>
+      <label for="jsonFileUpload" class="fileInputLabel">Upload File</label>
+    <input type="file" id="jsonFileUpload">
+    </fieldset>
+    <!-- <label for="jsonFileUpload">Import JSON file</label>
     <br>
     <input type="file" id="jsonFileUpload">
-    <br>
-    <label for="jsonTextBox">Import as Text</label>
-    <textarea id="jsonTextBox" class="fullSizeText" rows="22"></textarea>
+    <br> -->
+  <details>
+    <summary>Advanced Edit</summary>
+    <fieldset>
+  <legend>Edit Text</legend>
 
+    <textarea id="jsonTextBox" class="fullSizeText" rows="5"></textarea>
+  </fieldset>
+</details>
       <br>
-      <label for="images">Select Map:</label>
       <br>
+      <fieldset>
+      <legend for="images">Select Map:</legend>
+
       <select name="images" id="mapSelect" ></select>
+</fieldset>
       <br>
       <button id="importJSONButton">Import JSON</button>
       <button id="importSVGButton">Import SVG</button>
@@ -34,6 +48,21 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 // console.log(OBR.isAvailable);
 // console.log(OBR.isReady);
 
+function updateDarkMode(theme: Theme) {
+  const app = document.querySelector<HTMLDivElement>("#app");
+  if (app) {
+    app.setAttribute("data-theme", theme.mode);
+  }
+  // console.log(app?.getAttribute("data-theme"));
+}
+
+function updateHeight(): void {
+  const app = document.querySelector("#app") as HTMLDivElement;
+  if (app) OBR.action.setHeight(app.getBoundingClientRect().height);
+}
+
+var currentPos: Point = { x: 0, y: 0 };
+var currentImage: Image | null = null;
 OBR.onReady(() => {
   // console.log("OBR ready!");
   updateMapSelection();
@@ -48,6 +77,12 @@ OBR.onReady(() => {
   // });
   var currentPos = { x: 0, y: 0 };
   var currentImage: Image | null = null;
+  OBR.theme.onChange((t) => updateDarkMode(t));
+  OBR.theme.getTheme().then((t) => updateDarkMode(t));
+
+  const observer = new ResizeObserver(() => updateHeight());
+  observer.observe(document.querySelector<HTMLDivElement>("#app")!);
+
   document
     .querySelector<HTMLInputElement>("#jsonFileUpload")!
     .addEventListener("change", (event) => {
@@ -70,22 +105,7 @@ OBR.onReady(() => {
 
       reader.readAsText(file);
     });
-  // document
-  //   .querySelector<HTMLButtonElement>("#test")!
-  //   .addEventListener("click", () => {
-  //     // console.log(OBR.scene.items.getItems());
 
-  //     OBR.scene.items.getItems(isImage).then((item) => {
-  //       // console.log(item);
-  //       // (
-  //       //   item[0].metadata["rodeo.owlbear.dynamic-fog/doors"] as Array<Door>
-  //       // ).push({
-  //       //   open: true,
-  //       //   start: { distance: 0, index: 0 },
-  //       //   end: { distance: 500, index: 0 },
-  //       // });
-  //     });
-  //   });
   document
     .querySelector<HTMLSelectElement>("#mapSelect")
     ?.addEventListener("change", (ev) => {
@@ -111,10 +131,19 @@ OBR.onReady(() => {
       // console.log(currentPos);
       OBR.player.hasPermission("FOG_CREATE").then((v) => {
         if (v)
-          generateWalls(
-            document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
-            currentPos,
-          );
+          try {
+            generateWalls(
+              document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!
+                .value,
+              currentPos,
+            );
+            OBR.notification.show(
+              "Imported JSON content successfully",
+              "SUCCESS",
+            );
+          } catch (error) {
+            OBR.notification.show("Failed to parse JSON", "ERROR");
+          }
         else {
           OBR.notification.show(
             'Fog import failed, you do not have "FOG_CREATE" permissions',
@@ -127,13 +156,22 @@ OBR.onReady(() => {
     .querySelector<HTMLButtonElement>("#importSVGButton")!
     ?.addEventListener("click", (ev) => {
       ev.preventDefault();
-      console.log(currentPos);
+      // console.log(currentPos);
       OBR.player.hasPermission("FOG_CREATE").then((v) => {
         if (v)
-          generateSVGWalls(
-            document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!.value,
-            currentImage
-          );
+          try {
+            generateSVGWalls(
+              document.querySelector<HTMLTextAreaElement>("#jsonTextBox")!
+                .value,
+              currentImage,
+            );
+            OBR.notification.show(
+              "Imported SVG content successfully",
+              "SUCCESS",
+            );
+          } catch (error) {
+            OBR.notification.show("Failed to parse SVG", "ERROR");
+          }
         else {
           OBR.notification.show(
             'Fog import failed, you do not have "FOG_CREATE" permissions',
@@ -160,7 +198,6 @@ function updateMapSelection(): void {
     o.value = "NONE";
     o.textContent = "No Offset";
     select.appendChild(o);
-
     // Add an option for each image found in the scene
     images
       .filter((i) => i.layer == "MAP")
@@ -170,6 +207,8 @@ function updateMapSelection(): void {
         // Use the image name or a fallback if it's unnamed
         option.textContent =
           img.name || `Unnamed Image (${img.id.slice(0, 5)})`;
+
+        if (img.id == currentImage?.id) currentImage = img;
         select.appendChild(option);
       });
 
@@ -183,7 +222,10 @@ function updateMapSelection(): void {
         select.value = selectedValue;
       } else {
         // revert offset value
+        currentImage = null;
       }
+      currentPos =
+        currentImage?.position != null ? currentImage.position : currentPos;
     }
   });
 }
