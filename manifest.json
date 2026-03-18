@@ -10,6 +10,6 @@
     "icon": "./one-page-importer/icon.svg",
     "popover": "./one-page-importer/",
     "height": 600,
-    "width": 400
+    "width": 250
   } 
 }
