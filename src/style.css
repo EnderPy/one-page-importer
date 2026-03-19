@@ -106,7 +106,6 @@ fieldset:hover {
 }
 details {
   cursor: pointer;
-
 }
 
 .fullSizeText {
@@ -128,10 +127,33 @@ select {
   max-width: 100%;
   width: 100%;
   cursor: pointer;
-  
+
   background: transparent;
 }
 
 #app[data-theme="DARK"] select {
   color: inherit;
+}
+
+input[type="number"] {
+  padding: 8px;
+  border: 1px solid rgba(187, 153, 255, 0.5);
+  border-radius: 8px;
+  background-color: rgba(187, 153, 255, 0.1);
+  color: rgb(187, 153, 255);
+  transition:
+    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="number"]:hover {
+  border-color: rgb(187, 153, 255);
+  background-color: rgba(187, 153, 255, 0.2);
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: rgb(187, 153, 255);
+  background-color: rgba(187, 153, 255, 0.3);
 }

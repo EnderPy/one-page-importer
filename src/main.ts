@@ -26,6 +26,24 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
     <textarea id="jsonTextBox" class="fullSizeText" rows="5"></textarea>
   </fieldset>
+  <fieldset>
+    <legend>SVG Optimisation</legend>
+    
+    <label for="SVGOptimisePath">
+       Optimise Path
+       <input type="checkbox" id="SVGOptimisePath" checked>
+      </label>
+    
+    <label for="SVGOptimiseThreshold">
+      Min Angle
+    </label>
+    <input type="number" id="SVGOptimiseThreshold" min="0" max="180" value="20">
+    <br>
+    <label for="SVGOptimisePathMinPoints">
+      Min Points
+    </label>
+    <input type="number" id="SVGOptimisePathMinPoints" min="0" max="99" value="5">
+  </fieldset>
 </details>
       <br>
       <br>

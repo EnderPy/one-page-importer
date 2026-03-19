@@ -43,4 +43,40 @@ note: for caves, same procedure, except export as SVG from cave-generator, and c
 
 thanks to watabou for his amazing tool and source for this project, https://watabou.github.io/one-page-dungeon/
 
+## Advanced
 
+### SVG Optimisation
+
+This function, enabled by default, can significantly improve performance
+Enabled:
+![Default Optimised Nodes](./public/svg_optimised_default.png)
+
+![UnOptimised Nodes](./public/svg_unoptimised.png)
+
+ - Min Angle: 
+   - The angle of which must be met. Biggest imapact on performance. Accepts values between 0 and 179
+   - Recommended value of at least 5 for moderate performance increase with next to zero cosmetic difference, default is 20, if low performance adjust this first.
+ - Min Points:
+   - The minimum number of points skipped before forcing one to be added. Accepts values between 0 and 99. Zero disables this check
+   - Recommended minimum of 4 for performance, default 5. mostly affects large curves where angle might not account for difference. setting this to 1 is equivelant to disabling optimisation, so not recommended.
+
+Additional performance gains:
+ - Adjusting Generator Geometry
+  - on generator, right click > shape > geometry, 
+  - Irregularity:
+    - slightly adjusts shape of the cave on a large scale
+  - Bumpiness:
+    - adjusts how curvy (like a wave) the walls on a medium scale
+  - Roughness:
+    - increases sharpness of walls on a small scale
+  - For best performance, 0 Irregularity, 0 Bumpiness and ~0 Irregularity with 30 Angle and 10 Points should provide the least quantity of points
+  - For a balance of cosmetics and performance, 0/0/0.4 with 20-30 Angle and 5-10 points should reduce the number of visual artifacts
+  - For great cosmetics and good performance, use any geometry, with 10 Angle and 5 points
+  - For best cosmetics but still optimised, use 5 angle 5 points
+  - If you require absolute precision, disable optimisation (not recommended)
+
+A note on increasing cosmetics:
+ - if using high-performance profiles, you can adjust Owlbears' Fog Style - Line thickness. 
+  - Default optimisation works well with width 5-6 to cover entire wall.
+  - Adjust fog width as needed for higher performance profiles 
+ - High performance profiles may want to change the Cave Shadow Inner distance (right click - style - Shadow) from 1 to either 0 or 2-3 as it is commonly clipped from the SVG optimisation
