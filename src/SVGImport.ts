@@ -60,7 +60,12 @@ function formatSVGToOBRPath(
       pointCount = 0;
     } else if (type === "L") {
       pointCount += 1;
-      if (pointCount <= minPoints && optimise && prev && next) {
+      if (
+        (minPoints == 0 || pointCount <= minPoints) &&
+        optimise &&
+        prev &&
+        next
+      ) {
         const prevParams = prev.slice(1);
 
         const nextParams = next
@@ -126,11 +131,25 @@ export function generateSVGWalls(
 
   if (!path) return;
   // console.log(path);
-  const optimise = (document.querySelector("#SVGOptimisePath") as HTMLInputElement)?.checked ?? false;
-  const optimiseThreshold = parseFloat((document.querySelector("#SVGOptimiseThreshold") as HTMLInputElement)?.value ?? "20");
-  const optimiseMinPoints = parseInt((document.querySelector("#SVGOptimisePathMinPoints") as HTMLInputElement)?.value ?? "5", 10);
+  const optimise =
+    (document.querySelector("#SVGOptimisePath") as HTMLInputElement)?.checked ??
+    false;
+  const optimiseThreshold = parseFloat(
+    (document.querySelector("#SVGOptimiseThreshold") as HTMLInputElement)
+      ?.value ?? "20",
+  );
+  const optimiseMinPoints = parseInt(
+    (document.querySelector("#SVGOptimisePathMinPoints") as HTMLInputElement)
+      ?.value ?? "5",
+    10,
+  );
 
-  const commands = formatSVGToOBRPath(path, optimise, optimiseThreshold, optimiseMinPoints);
+  const commands = formatSVGToOBRPath(
+    path,
+    optimise,
+    optimiseThreshold,
+    optimiseMinPoints,
+  );
 
   if (image) {
     let grid = image.grid;
