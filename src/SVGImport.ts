@@ -36,20 +36,53 @@ function getFogFromSVG(
   return path ? path.getAttribute("d") : null;
 }
 
-function formatSVGToOBRPath(svgPath: string): PathCommand[] {
+function formatSVGToOBRPath(
+  svgPath: string,
+  optimise: boolean = true,
+  threshold: number = 20, // assume degrees
+  minPoints: number = 5,
+): PathCommand[] {
   const commands: PathCommand[] = [];
   const svgCommands = svgPath.match(/[a-zA-Z][^a-zA-Z]*/g) || [];
-  for (const command of svgCommands) {
+  var pointCount = 0;
+  for (let i = 0; i < svgCommands.length; i++) {
+    const command = svgCommands[i];
+    const prev = i > 0 ? commands[commands.length - 1] : null;
+    const next = i < svgCommands.length - 1 ? svgCommands[i + 1] : null;
     const type = command[0];
     const params = command
       .slice(1)
       .trim()
-      .split(/[\s,]+/)
+      .split(/[,\s]+/)
       .map(Number);
-
     if (type === "M") {
       commands.push([Command.MOVE, params[0], params[1]]);
+      pointCount = 0;
     } else if (type === "L") {
+      pointCount += 1;
+      if (pointCount <= minPoints && optimise && prev && next) {
+        const prevParams = prev.slice(1);
+
+        const nextParams = next
+          .slice(1)
+          .trim()
+          .split(/[\,\s]+/)
+          .map(Number);
+
+        const vectorA = [params[0] - prevParams[0], params[1] - prevParams[1]];
+        const vectorB = [nextParams[0] - params[0], nextParams[1] - params[1]];
+
+        const dotProduct = vectorA[0] * vectorB[0] + vectorA[1] * vectorB[1];
+        const magnitudeA = Math.sqrt(vectorA[0] ** 2 + vectorA[1] ** 2);
+        const magnitudeB = Math.sqrt(vectorB[0] ** 2 + vectorB[1] ** 2);
+
+        const angle = Math.acos(dotProduct / (magnitudeA * magnitudeB));
+
+        if (angle <= threshold * (Math.PI / 180)) {
+          continue;
+        }
+      }
+      pointCount = 0;
       commands.push([Command.LINE, params[0], params[1]]);
     }
   }
@@ -93,7 +126,11 @@ export function generateSVGWalls(
 
   if (!path) return;
   // console.log(path);
-  const commands = formatSVGToOBRPath(path);
+  const optimise = (document.querySelector("#SVGOptimisePath") as HTMLInputElement)?.checked ?? false;
+  const optimiseThreshold = parseFloat((document.querySelector("#SVGOptimiseThreshold") as HTMLInputElement)?.value ?? "20");
+  const optimiseMinPoints = parseInt((document.querySelector("#SVGOptimisePathMinPoints") as HTMLInputElement)?.value ?? "5", 10);
+
+  const commands = formatSVGToOBRPath(path, optimise, optimiseThreshold, optimiseMinPoints);
 
   if (image) {
     let grid = image.grid;
