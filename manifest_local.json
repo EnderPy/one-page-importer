@@ -4,7 +4,7 @@
   "icon":"./icon.svg",
   "version": "1.2.1",
     "manifest_version": 1,
-  "description":"Import Maps from Watabous' One Page Dungeon",
+  "description":  "Import Maps from Watabous' One Page Dungeon using his JSON export. Features integration with Dynamic Fog's Door Mechanic",
   "action": {
     "title": "One Page Importer",
     "icon": "./icon.svg",
