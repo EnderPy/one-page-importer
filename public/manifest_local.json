@@ -2,7 +2,7 @@
   "name": "One Page Importer - DEV",
   "author":"EnderPi",
   "icon":"./icon.svg",
-  "version": "1.2.1",
+  "version": "1.2.2",
     "manifest_version": 1,
   "description":  "Import Maps from Watabous' One Page Dungeon using his JSON export. Features integration with Dynamic Fog's Door Mechanic",
   "action": {
