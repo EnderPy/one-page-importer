@@ -8,57 +8,83 @@ import OBR, { isImage, type Image, type Theme } from "@owlbear-rodeo/sdk";
 import type { Point } from "./types";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div class="appWrapper">
-    <span class="headerText">One Page Dungeon Importer</span>
-    <fieldset>
-      <legend>Import File</legend>
-      <label for="jsonFileUpload" class="fileInputLabel">Upload File</label>
-    <input type="file" id="jsonFileUpload">
-    </fieldset>
-    <!-- <label for="jsonFileUpload">Import JSON file</label>
+<div class="appWrapper">
+  <span class="headerText">One Page Dungeon Importer</span>
+  <fieldset>
+    <legend
+      title="Upload File for processing.\nDungeons use JSON format, caves use SVG format"
+    >
+      Import File
+    </legend>
+    <label for="jsonFileUpload" class="fileInputLabel">Upload File</label>
+    <input
+      type="file"
+      id="jsonFileUpload"
+      accept=".svg, image/svg+xml, application/json"
+    />
+  </fieldset>
+  <!-- <label for="jsonFileUpload">Import JSON file</label>
     <br>
     <input type="file" id="jsonFileUpload">
     <br> -->
   <details>
-    <summary>Advanced Edit</summary>
+    <summary>Advanced</summary>
     <fieldset>
-  <legend>Edit Text</legend>
+      <legend>Edit Text</legend>
 
-    <textarea id="jsonTextBox" class="fullSizeText" rows="5"></textarea>
-  </fieldset>
-  <fieldset>
-    <legend>SVG Optimisation</legend>
-    
-    <label for="SVGOptimisePath">
-       Optimise Path
-       <input type="checkbox" id="SVGOptimisePath" checked>
+      <textarea id="jsonTextBox" class="fullSizeText" rows="5"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Cave SVG Optimisation</legend>
+
+      <label for="SVGOptimisePath">
+        Optimise Path
+        <input type="checkbox" id="SVGOptimisePath" checked />
       </label>
-    
-    <label for="SVGOptimiseThreshold">
-      Min Angle
-    </label>
-    <input type="number" id="SVGOptimiseThreshold" min="0" max="180" value="20">
-    <br>
-    <label for="SVGOptimisePathMinPoints">
-      Min Points
-    </label>
-    <input type="number" id="SVGOptimisePathMinPoints" min="0" max="99" value="5">
+
+      <label for="SVGOptimiseThreshold"> Min Angle </label>
+      <input
+        type="number"
+        id="SVGOptimiseThreshold"
+        min="0"
+        max="180"
+        value="20"
+      />
+      <br />
+      <label for="SVGOptimisePathMinPoints"> Min Points </label>
+      <input
+        type="number"
+        id="SVGOptimisePathMinPoints"
+        min="0"
+        max="99"
+        value="5"
+      />
+    </fieldset>
+  </details>
+  <br />
+  <br />
+  <fieldset>
+    <legend for="images">Select Map:</legend>
+
+    <select name="images" id="mapSelect"></select>
   </fieldset>
-</details>
-      <br>
-      <br>
-      <fieldset>
-      <legend for="images">Select Map:</legend>
+  <br />
+  <button
+    id="importJSONButton"
+    title="Used for processing a dungeon, only supports JSON files"
+  >
+    Import Dungeon (JSON)
+  </button>
+  <button
+    id="importSVGButton"
+    title="Used for Caves / Glades, only supports SVG files"
+  >
+    Import Cave (SVG)
+  </button>
 
-      <select name="images" id="mapSelect" ></select>
-</fieldset>
-      <br>
-      <button id="importJSONButton">Import JSON</button>
-      <button id="importSVGButton">Import SVG</button>
+  <!-- <button id="test">Test</button> -->
+</div>
 
-      <!-- <button id="test">Test</button> -->
-
-  </div> 
 `;
 // setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 // console.log("Hello from Vite + TypeScript!");

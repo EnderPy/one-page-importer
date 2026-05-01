@@ -2,9 +2,9 @@
   "name": "One Page Importer",
   "author":"EnderPi",
   "icon":"./one-page-importer/icon.svg",
-  "version": "1.2.2",
+  "version": "1.3.0",
     "manifest_version": 1,
-  "description":"Import Maps from Watabous' One Page Dungeon",
+  "description":  "Import Maps from Watabous' OnePageDungeon and Cave Generators. Features integration with Dynamic Fog's Door Mechanic",
   "action": {
     "title": "One Page Importer",
     "icon": "./one-page-importer/icon.svg",
