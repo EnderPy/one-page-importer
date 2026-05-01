@@ -3,7 +3,7 @@ title: One Page Importer
 description: 
   "Import Dungeons and Caves from Watabou's Cave and Dungeon Generators"
 author: EnderPy
-image: https://enderpy.github.io/one-page-importer/hero.png
+image: https://github.com/EnderPy/one-page-importer/blob/2eef6257a53602fde0ee41c0499fc6dc68b1b00e/docs/hero.png
 icon: https://enderpy.github.io/one-page-importer/icon.svg
 tags:
   - fog
